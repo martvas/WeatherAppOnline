@@ -1,0 +1,188 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.martin.weatheronline.weatherapponline.WeatherInfoFragment">
+
+    <TextView
+        android:id="@+id/city_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="10dp"
+        android:textColor="@color/colorBlack"
+        android:textSize="@dimen/mid_text_size"
+        tools:text="Gorod" />
+
+    <TextView
+        android:id="@+id/city_weather_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/city_title"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorPrimary"
+        android:textSize="140sp"
+        tools:text="ic" />
+
+    <LinearLayout
+        android:id="@+id/temp_today"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/city_weather_icon"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/temp_now_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/temp_size_text"
+            tools:text="7" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingTop="@dimen/celsius_grade_paddingTop"
+            android:text="@string/celsius_and_grade"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/mid_text_size" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/min_temp_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/temp_today"
+        android:layout_centerHorizontal="true"
+        android:text="@string/min_temp_title_txt" />
+
+    <TextView
+        android:id="@+id/min_temp_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/temp_today"
+        android:layout_toRightOf="@id/min_temp_title"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:textColor="@color/colorBlack"
+        tools:text="18" />
+
+    <TextView
+        android:id="@+id/min_temp_celsius"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/temp_today"
+        android:layout_toRightOf="@id/min_temp_value"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:text="@string/celsius_and_grade" />
+
+    <TextView
+        android:id="@+id/max_temp_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/min_temp_title"
+        android:layout_centerHorizontal="true"
+        android:text="@string/max_temp_title_txt" />
+
+    <TextView
+        android:id="@+id/max_temp_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/min_temp_title"
+        android:layout_toRightOf="@id/max_temp_title"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:textColor="@color/colorBlack"
+        tools:text="18" />
+
+    <TextView
+        android:id="@+id/max_temp_celsius"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/min_temp_title"
+        android:layout_toRightOf="@id/max_temp_value"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:text="@string/celsius_and_grade" />
+
+    <TextView
+        android:id="@+id/pressure_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/max_temp_title"
+        android:layout_centerHorizontal="true"
+        android:text="@string/pressure_title_txt" />
+
+    <TextView
+        android:id="@+id/pressure_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/max_temp_title"
+        android:layout_toRightOf="@id/pressure_title"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:textColor="@color/colorBlack"
+        tools:text="180" />
+
+    <TextView
+        android:id="@+id/pressure_metric"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/max_temp_value"
+        android:layout_toRightOf="@id/pressure_value"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:text="@string/hpa_metric_txt" />
+
+    <TextView
+        android:id="@+id/humidity_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pressure_title"
+        android:layout_centerHorizontal="true"
+        android:text="@string/humidity_title_txt" />
+
+    <TextView
+        android:id="@+id/humidity_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pressure_title"
+        android:layout_toRightOf="@id/humidity_title"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:textColor="@color/colorBlack"
+        tools:text="80" />
+
+    <TextView
+        android:id="@+id/humidity_metric"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pressure_value"
+        android:layout_toRightOf="@id/humidity_value"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:text="@string/percent_sign" />
+
+    <TextView
+        android:id="@+id/wind_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/humidity_title"
+        android:layout_centerHorizontal="true"
+        android:text="@string/wind_title_txt" />
+
+    <TextView
+        android:id="@+id/wind_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/humidity_title"
+        android:layout_toRightOf="@id/wind_title"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:textColor="@color/colorBlack"
+        tools:text="80" />
+
+    <TextView
+        android:id="@+id/wind_metric"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/humidity_title"
+        android:layout_toRightOf="@id/wind_value"
+        android:paddingLeft="@dimen/small_value_to_title_padding"
+        android:text="@string/percent_sign" />
+
+
+</RelativeLayout>
