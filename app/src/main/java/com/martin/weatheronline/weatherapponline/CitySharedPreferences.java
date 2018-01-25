@@ -13,10 +13,11 @@ public class CitySharedPreferences {
     }
 
     void setCityInSP(String city) {
-        sharedPreferences.edit().putString(KEY, city).apply();
+        sharedPreferences.edit().putString(KEY, MyCaesarCipher.encrypt(city)).apply();
     }
 
     String getCityFromSP() {
-        return sharedPreferences.getString(KEY, STANDART_CITY);
+        String spCryptString = sharedPreferences.getString(KEY, STANDART_CITY);
+        return MyCaesarCipher.decrypt(spCryptString);
     }
 }

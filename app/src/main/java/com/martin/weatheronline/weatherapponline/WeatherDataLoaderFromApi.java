@@ -1,6 +1,7 @@
 package com.martin.weatheronline.weatherapponline;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -9,7 +10,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class WeatherDataLoader {
+public class WeatherDataLoaderFromApi {
     private static final String apiKey = "b530d8eb26f286763d166441260b3652";
     private static final String OPEN_WEATHER_API_CALL = "http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&appid=%s";
     private static final String RESPONSE = "cod";
@@ -37,5 +38,19 @@ public class WeatherDataLoader {
         } catch (Exception e) {
             return null; //FIXME Обработка ошибки
         }
+    }
+
+    static boolean isConnectionExist() {
+        String response;
+        try {
+            URL url = new URL(String.format(OPEN_WEATHER_API_CALL, "riga", apiKey));
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            response = con.getResponseMessage();
+        } catch (Exception e) {
+            Log.d(WeatherActivity.LOG_TAG, e.getMessage());
+            return false;
+        }
+
+        return response.equals("200");
     }
 }

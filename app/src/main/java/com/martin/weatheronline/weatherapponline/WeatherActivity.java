@@ -11,6 +11,7 @@ import android.widget.EditText;
 
 public class WeatherActivity extends AppCompatActivity {
 
+    public static final String LOG_TAG = "weather_log";
     private static final String DIALOG_BTN_TEXT = "Search";
     private static final String WEATHER_INFO_TAG = "weather_info_tag123";
     private CitySharedPreferences sharedPreferences;
@@ -53,7 +54,6 @@ public class WeatherActivity extends AppCompatActivity {
                 .setPositiveButton(DIALOG_BTN_TEXT, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-//                        Log.d("wtf", cityInput.getText().toString());
                         searchNewCity(cityInput.getText().toString());
                     }
                 })//

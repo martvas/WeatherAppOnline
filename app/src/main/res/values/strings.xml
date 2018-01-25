@@ -3,7 +3,7 @@
 
     <string name="celsius_and_grade">°C</string>
     <string name="search_city_dialog">Search city</string>
-    <string name="city_not_found">Don't found that city</string>
+    <string name="city_not_found">Don\'t found that city</string>
     <string name="min_temp_title_txt">Min temp:</string>
     <string name="max_temp_title_txt">Max temp:</string>
     <string name="pressure_title_txt">Pressure:</string>
@@ -73,6 +73,7 @@
     <string name="wi_owm_905">&#xf021;</string>
     <string name="wi_owm_906">&#xf015;</string>
     <string name="wi_owm_957">&#xf050;</string>
+    <string name="internet_problem">Problem with internet connection</string>
 
 
 </resources>
