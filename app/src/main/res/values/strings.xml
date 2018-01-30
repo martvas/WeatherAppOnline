@@ -73,7 +73,8 @@
     <string name="wi_owm_905">&#xf021;</string>
     <string name="wi_owm_906">&#xf015;</string>
     <string name="wi_owm_957">&#xf050;</string>
-    <string name="internet_problem">Problem with internet connection</string>
+    <string name="inet_problem_local_weather">Internet connection problem. Loading local weather map</string>
+    <string name="inet_problem">Internet connection problem</string>
 
 
 </resources>

@@ -1,4 +1,4 @@
-package com.martin.weatheronline.weatherapponline;
+package com.martin.weatheronline.weatherapponline.sharedPreferences;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -12,11 +12,11 @@ public class CitySharedPreferences {
         sharedPreferences = activity.getPreferences(Activity.MODE_PRIVATE);
     }
 
-    void setCityInSP(String city) {
+    public void setCityInSP(String city) {
         sharedPreferences.edit().putString(KEY, MyCaesarCipher.encrypt(city)).apply();
     }
 
-    String getCityFromSP() {
+    public String getCityFromSP() {
         String spCryptString = sharedPreferences.getString(KEY, STANDART_CITY);
         return MyCaesarCipher.decrypt(spCryptString);
     }

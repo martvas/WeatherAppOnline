@@ -14,7 +14,6 @@ public class WeatherActivity extends AppCompatActivity {
     public static final String LOG_TAG = "weather_log";
     private static final String DIALOG_BTN_TEXT = "Search";
     private static final String WEATHER_INFO_TAG = "weather_info_tag123";
-    private CitySharedPreferences sharedPreferences;
 
 
     @Override
@@ -22,7 +21,6 @@ public class WeatherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
-        sharedPreferences = new CitySharedPreferences(this);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.container_for_fragment,
                     new WeatherInfoFragment(), WEATHER_INFO_TAG).commit();
@@ -48,15 +46,15 @@ public class WeatherActivity extends AppCompatActivity {
     private void showSearchCityDialog() {
         final EditText cityInput = new EditText(this);
         cityInput.setInputType(InputType.TYPE_CLASS_TEXT);
-        new AlertDialog.Builder(WeatherActivity.this)//
-                .setTitle(R.string.search_city_dialog)//
-                .setView(cityInput)//
+        new AlertDialog.Builder(WeatherActivity.this)
+                .setTitle(R.string.search_city_dialog)
+                .setView(cityInput)
                 .setPositiveButton(DIALOG_BTN_TEXT, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         searchNewCity(cityInput.getText().toString());
                     }
-                })//
+                })
                 .show();
     }
 
@@ -64,6 +62,5 @@ public class WeatherActivity extends AppCompatActivity {
     public void searchNewCity(String city) {
         WeatherInfoFragment weatherInfoFragment = (WeatherInfoFragment) getSupportFragmentManager().findFragmentByTag(WEATHER_INFO_TAG);
         weatherInfoFragment.changeCity(city);
-        sharedPreferences.setCityInSP(city);
     }
 }

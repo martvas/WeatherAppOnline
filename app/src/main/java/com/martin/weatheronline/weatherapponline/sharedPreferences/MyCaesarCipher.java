@@ -1,4 +1,4 @@
-package com.martin.weatheronline.weatherapponline;
+package com.martin.weatheronline.weatherapponline.sharedPreferences;
 
 public class MyCaesarCipher {
 

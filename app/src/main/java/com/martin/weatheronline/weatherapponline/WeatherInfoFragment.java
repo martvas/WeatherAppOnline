@@ -13,14 +13,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.martin.weatheronline.weatherapponline.database.WeatherDB;
+import com.martin.weatheronline.weatherapponline.network.CityWeatherMap;
+import com.martin.weatheronline.weatherapponline.network.WeatherLoaderRetrofit;
+import com.martin.weatheronline.weatherapponline.sharedPreferences.CitySharedPreferences;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Locale;
 
@@ -29,7 +26,8 @@ public class WeatherInfoFragment extends Fragment {
     private static final String LOG_TAG = "WeatherInfoFrag";
     private static final String FONT_FILENAME = "fonts/weathericons-regular-webfont.ttf";
     private final Handler handler = new Handler();
-    private final String FILE_NAME = "last_json_city.txt";
+    private CitySharedPreferences sharedPreferences;
+    private Gson gson;
 
     private Typeface weatherFont;
     private TextView cityTitle;
@@ -40,13 +38,17 @@ public class WeatherInfoFragment extends Fragment {
     private TextView pressureValue;
     private TextView humidityValue;
     private TextView windValue;
+    private WeatherDB weatherDB;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         WeatherActivity weatherActivity = (WeatherActivity) getActivity();
         weatherFont = Typeface.createFromAsset(weatherActivity.getAssets(), FONT_FILENAME);
-        updateWeatherData(true, new CitySharedPreferences(getActivity()).getCityFromSP());
+        gson = new Gson();
+        weatherDB = new WeatherDB(weatherActivity, gson);
+        sharedPreferences = new CitySharedPreferences(getActivity());
+        updateWeatherData(true, sharedPreferences.getCityFromSP());
     }
 
     @Override
@@ -68,27 +70,41 @@ public class WeatherInfoFragment extends Fragment {
     private void updateWeatherData(final boolean firstLaunching, final String city) {
         new Thread() {
             public void run() {
-                final JSONObject json = WeatherDataLoaderFromApi.getJSONData(getActivity(), city);
-                if (json == null) {
-                    if (firstLaunching && !WeatherDataLoaderFromApi.isConnectionExist()) {
+                final CityWeatherMap weatherMap = WeatherLoaderRetrofit.getWeatherMap(getActivity(), city);
+                //NULL - возвращает, когда проблемы с доступом к сайту или exception
+                // не писал дополнительный метод для проверки доступа к интернету, так как решил что можно в ответе getWeatherMap получить нужную инфу
+                if (weatherMap == null) {
+                    //Получаем данные из базы данных если есть
+                    final CityWeatherMap weatherMapFromDB = weatherDB.getCityWeatherFromDb(city);
+                    if (weatherMapFromDB == null) {
                         handler.post(new Runnable() {
-                            @Override
                             public void run() {
-                                renderWeather(getJsonFromInternalStorage());
+                                showToast(getString(R.string.inet_problem));
                             }
                         });
                     } else {
                         handler.post(new Runnable() {
                             public void run() {
-                                showToast(getString(R.string.city_not_found));
+                                showToast(getString(R.string.inet_problem_local_weather));
+                                renderWeather(weatherMapFromDB);
                             }
                         });
                     }
+
+                } else if (weatherMap.getCod() == 404) {
+                    //Если у ответа код 404 - не найдено, то пишем что не найдено города
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            showToast(getString(R.string.city_not_found));
+                        }
+                    });
                 } else {
-                    saveJsonAtInternalStorage(json);
+                    weatherDB.addOrUpdateCityWeather(weatherMap.getId(), weatherMap.getName(), gson.toJson(weatherMap));
                     handler.post(new Runnable() {
                         public void run() {
-                            renderWeather(json);
+                            sharedPreferences.setCityInSP(city);
+                            renderWeather(weatherMap);
                         }
                     });
                 }
@@ -96,33 +112,32 @@ public class WeatherInfoFragment extends Fragment {
         }.start();
     }
 
-    private void renderWeather(JSONObject json) {
+    private void renderWeather(CityWeatherMap map) {
         try {
-            MyWeatherMap map = new Gson().fromJson(json.toString(), MyWeatherMap.class);
             String city = map.getName().toUpperCase(Locale.US);
-            float temp = map.getMainInfo().getTemp();
-            Integer minTemp = map.getMainInfo().getTempMin();
-            Integer maxTemp = map.getMainInfo().getTempMax();
-            Integer pressure = map.getMainInfo().getPressure();
+            Float temp = map.getMainInfo().getTemp();
+            Float minTemp = map.getMainInfo().getTempMin();
+            Float maxTemp = map.getMainInfo().getTempMax();
+            Float pressure = map.getMainInfo().getPressure();
             Integer humidity = map.getMainInfo().getHumidity();
             Float wind = map.getWind().getSpeed();
 
-            Integer id = map.getId();
+            Integer id = map.getWeatherId();
             Long sunrise = map.getSunrise();
             Long sunset = map.getSunset();
 
             cityTitle.setText(city);
             tempNow.setText(String.format(Locale.ENGLISH, "%.1f", temp));
-            minTempValue.setText(String.format(Locale.ENGLISH, "%d", minTemp));
-            maxTempValue.setText(String.format(Locale.ENGLISH, "%d", maxTemp));
-            pressureValue.setText(String.format(Locale.ENGLISH, "%d", pressure));
+            minTempValue.setText(String.format(Locale.ENGLISH, "%.1f", minTemp));
+            maxTempValue.setText(String.format(Locale.ENGLISH, "%.1f", maxTemp));
+            pressureValue.setText(String.format(Locale.ENGLISH, "%.2f", pressure));
             humidityValue.setText(String.format(Locale.ENGLISH, "%d", humidity));
             windValue.setText(String.format(Locale.ENGLISH, "%.2f", wind));
             setWeatherIcon(id, sunrise, sunset);
 
 
         } catch (Exception e) {
-            Log.d(LOG_TAG, e.getMessage());//FIXME Обработка ошибки
+            Log.d(LOG_TAG, e.getMessage());
         }
     }
 
@@ -154,52 +169,4 @@ public class WeatherInfoFragment extends Fragment {
     private void showToast(String textForToast) {
         Toast.makeText(getActivity(), textForToast, Toast.LENGTH_LONG).show();
     }
-
-
-    private void saveJsonAtInternalStorage(final JSONObject json) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String jsonFilePath = getContext().getFilesDir() + "/" + FILE_NAME;
-
-                try {
-                    FileOutputStream fileOutput = new FileOutputStream(jsonFilePath, false);
-                    fileOutput.write(json.toString().getBytes());
-                    fileOutput.flush();
-                    fileOutput.close();
-                } catch (IOException e) {
-                    Log.d(WeatherActivity.LOG_TAG, e.getMessage());
-                }
-
-            }
-        }).start();
-    }
-
-    private JSONObject getJsonFromInternalStorage() {
-        JSONObject jsonObject = null;
-        StringBuffer stringBuffer = new StringBuffer();
-
-        try {
-            String jsonFilePath = getContext().getFilesDir() + "/" + FILE_NAME;
-            File jsonFile = new File(jsonFilePath);
-            if (!jsonFile.exists()) {
-                Log.d(WeatherActivity.LOG_TAG, "File in internal storage - don't exist");
-            } else {
-                BufferedReader br = new BufferedReader(new FileReader(jsonFile));
-
-                String line;
-                while ((line = br.readLine()) != null) {
-                    stringBuffer.append(line);
-                }
-
-                jsonObject = new JSONObject(stringBuffer.toString());
-            }
-
-        } catch (Exception e) {
-            Log.d(WeatherActivity.LOG_TAG, e.getMessage());
-        }
-
-        return jsonObject;
-    }
-
 }
