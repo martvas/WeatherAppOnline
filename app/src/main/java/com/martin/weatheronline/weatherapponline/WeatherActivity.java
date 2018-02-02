@@ -11,7 +11,7 @@ import android.widget.EditText;
 
 public class WeatherActivity extends AppCompatActivity {
 
-    public static final String LOG_TAG = "weather_log";
+    public static final String LOG_TAG = "wlog";
     private static final String DIALOG_BTN_TEXT = "Search";
     private static final String WEATHER_INFO_TAG = "weather_info_tag123";
 

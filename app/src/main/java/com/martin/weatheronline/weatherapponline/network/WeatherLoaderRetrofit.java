@@ -1,6 +1,8 @@
 package com.martin.weatheronline.weatherapponline.network;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.martin.weatheronline.weatherapponline.WeatherActivity;
@@ -15,11 +17,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class WeatherLoaderRetrofit {
     private static final String apiKey = "b530d8eb26f286763d166441260b3652";
-    private static final String OPEN_WEATHER_BASE_URL = "http://ai.openweathermap.org/";
+    private static final String OPEN_WEATHER_BASE_URL = "http://api.openweathermap.org/";
     private static final String UNIT = "metric";
 
     public static CityWeatherMap getWeatherMap(Context context, String city) {
         CityWeatherMap weatherMap = null;
+
+        //когда оффлайн очень долго делал запрос через Retrofit, поэтому сделал быструю проверку на доступ к интернету
+        if (!isConnectedToInternet(context)) return weatherMap;
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(OPEN_WEATHER_BASE_URL)
@@ -43,6 +48,17 @@ public class WeatherLoaderRetrofit {
             Log.d(WeatherActivity.LOG_TAG, e.getMessage());
         }
         return weatherMap;
+    }
+
+    private static boolean isConnectedToInternet(Context context) {
+        ConnectivityManager connectivityManager;
+        NetworkInfo activeNetwork;
+
+        connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        activeNetwork = connectivityManager.getActiveNetworkInfo();
+        if (activeNetwork == null) return false;
+        else if (activeNetwork.isConnected()) return true;
+        else return true;
     }
 
 }

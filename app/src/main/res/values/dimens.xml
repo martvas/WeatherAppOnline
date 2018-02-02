@@ -5,4 +5,5 @@
     <dimen name="big_text_size">48sp</dimen>
     <dimen name="small_value_to_title_margin">5dp</dimen>
     <dimen name="celsius_grade_paddingTop">32dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

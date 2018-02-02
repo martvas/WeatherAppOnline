@@ -1,9 +1,13 @@
 package com.martin.weatheronline.weatherapponline;
 
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,6 +53,7 @@ public class WeatherInfoFragment extends Fragment {
         weatherDB = new WeatherDB(weatherActivity, gson);
         sharedPreferences = new CitySharedPreferences(getActivity());
         updateWeatherData(true, sharedPreferences.getCityFromSP());
+
     }
 
     @Override
@@ -63,6 +68,16 @@ public class WeatherInfoFragment extends Fragment {
         pressureValue = weatherInfoView.findViewById(R.id.pressure_value);
         humidityValue = weatherInfoView.findViewById(R.id.humidity_value);
         windValue = weatherInfoView.findViewById(R.id.wind_value);
+
+
+        FloatingActionButton fab = weatherInfoView.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startShareIntent();
+            }
+        });
+
         return weatherInfoView;
     }
 
@@ -122,6 +137,8 @@ public class WeatherInfoFragment extends Fragment {
             Integer humidity = map.getMainInfo().getHumidity();
             Float wind = map.getWind().getSpeed();
 
+            getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
             Integer id = map.getWeatherId();
             Long sunrise = map.getSunrise();
             Long sunset = map.getSunset();
@@ -151,7 +168,6 @@ public class WeatherInfoFragment extends Fragment {
 
 
     public int getResId(String resName, Class<?> c) {
-
         try {
             Field idField = c.getDeclaredField(resName);
             return idField.getInt(idField);
@@ -165,8 +181,19 @@ public class WeatherInfoFragment extends Fragment {
         updateWeatherData(false, city);
     }
 
-
     private void showToast(String textForToast) {
         Toast.makeText(getActivity(), textForToast, Toast.LENGTH_LONG).show();
+    }
+
+    private void startShareIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Weather in " + cityTitle.getText().toString());
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Temerature right now is: " + tempNow.getText().toString());
+        shareIntent.setType("message/rfc822");
+        try {
+            startActivity(shareIntent);
+        } catch (ActivityNotFoundException e) {
+            showToast("No email client on device");
+        }
     }
 }
