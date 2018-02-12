@@ -15,7 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 
-public class WeatherLoaderRetrofit {
+public class WeatherLoader {
     private static final String apiKey = "b530d8eb26f286763d166441260b3652";
     private static final String OPEN_WEATHER_BASE_URL = "http://api.openweathermap.org/";
     private static final String UNIT = "metric";

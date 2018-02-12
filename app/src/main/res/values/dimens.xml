@@ -6,4 +6,5 @@
     <dimen name="small_value_to_title_margin">5dp</dimen>
     <dimen name="celsius_grade_paddingTop">32dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="city_margin_top">20dp</dimen>
 </resources>

@@ -19,7 +19,8 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.martin.weatheronline.weatherapponline.database.WeatherDB;
 import com.martin.weatheronline.weatherapponline.network.CityWeatherMap;
-import com.martin.weatheronline.weatherapponline.network.WeatherLoaderRetrofit;
+import com.martin.weatheronline.weatherapponline.network.WeatherLoader;
+import com.martin.weatheronline.weatherapponline.serviceScheduler.WeatherJobScheduler;
 import com.martin.weatheronline.weatherapponline.sharedPreferences.CitySharedPreferences;
 
 import java.lang.reflect.Field;
@@ -35,6 +36,7 @@ public class WeatherInfoFragment extends Fragment {
 
     private Typeface weatherFont;
     private TextView cityTitle;
+    private TextView date;
     private TextView cityWeatherIcon;
     private TextView tempNow;
     private TextView minTempValue;
@@ -53,13 +55,15 @@ public class WeatherInfoFragment extends Fragment {
         weatherDB = new WeatherDB(weatherActivity, gson);
         sharedPreferences = new CitySharedPreferences(getActivity());
         updateWeatherData(true, sharedPreferences.getCityFromSP());
-
+        WeatherJobScheduler weatherJobScheduler = new WeatherJobScheduler(getContext());
+        weatherJobScheduler.startSchedule();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View weatherInfoView = inflater.inflate(R.layout.fragment_weather_info, container, false);
         cityTitle = weatherInfoView.findViewById(R.id.city_title);
+        date = weatherInfoView.findViewById(R.id.datetime);
         cityWeatherIcon = weatherInfoView.findViewById(R.id.city_weather_icon);
         cityWeatherIcon.setTypeface(weatherFont);
         tempNow = weatherInfoView.findViewById(R.id.temp_now_txt);
@@ -68,7 +72,6 @@ public class WeatherInfoFragment extends Fragment {
         pressureValue = weatherInfoView.findViewById(R.id.pressure_value);
         humidityValue = weatherInfoView.findViewById(R.id.humidity_value);
         windValue = weatherInfoView.findViewById(R.id.wind_value);
-
 
         FloatingActionButton fab = weatherInfoView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -85,7 +88,7 @@ public class WeatherInfoFragment extends Fragment {
     private void updateWeatherData(final boolean firstLaunching, final String city) {
         new Thread() {
             public void run() {
-                final CityWeatherMap weatherMap = WeatherLoaderRetrofit.getWeatherMap(getActivity(), city);
+                final CityWeatherMap weatherMap = WeatherLoader.getWeatherMap(getActivity(), city);
                 //NULL - возвращает, когда проблемы с доступом к сайту или exception
                 // не писал дополнительный метод для проверки доступа к интернету, так как решил что можно в ответе getWeatherMap получить нужную инфу
                 if (weatherMap == null) {
@@ -130,13 +133,13 @@ public class WeatherInfoFragment extends Fragment {
     private void renderWeather(CityWeatherMap map) {
         try {
             String city = map.getName().toUpperCase(Locale.US);
+            Long unixDate = map.getDateInUnix();
             Float temp = map.getMainInfo().getTemp();
             Float minTemp = map.getMainInfo().getTempMin();
             Float maxTemp = map.getMainInfo().getTempMax();
             Float pressure = map.getMainInfo().getPressure();
             Integer humidity = map.getMainInfo().getHumidity();
             Float wind = map.getWind().getSpeed();
-
             getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
             Integer id = map.getWeatherId();
@@ -144,6 +147,7 @@ public class WeatherInfoFragment extends Fragment {
             Long sunset = map.getSunset();
 
             cityTitle.setText(city);
+            date.setText(String.format("Lastupdate: %1$tk:%1$tM %1$te.%1$tm.%1$tY", unixDate * 1000));
             tempNow.setText(String.format(Locale.ENGLISH, "%.1f", temp));
             minTempValue.setText(String.format(Locale.ENGLISH, "%.1f", minTemp));
             maxTempValue.setText(String.format(Locale.ENGLISH, "%.1f", maxTemp));
@@ -151,8 +155,6 @@ public class WeatherInfoFragment extends Fragment {
             humidityValue.setText(String.format(Locale.ENGLISH, "%d", humidity));
             windValue.setText(String.format(Locale.ENGLISH, "%.2f", wind));
             setWeatherIcon(id, sunrise, sunset);
-
-
         } catch (Exception e) {
             Log.d(LOG_TAG, e.getMessage());
         }

@@ -4,10 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-/**
- * Created by Martin on 29-Jan-18.
- */
-
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String TABLE_WEATHER = "city_weather";

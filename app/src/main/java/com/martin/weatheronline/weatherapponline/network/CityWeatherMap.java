@@ -29,7 +29,7 @@ public class CityWeatherMap {
     public Clouds clouds;
 
     @SerializedName("dt")
-    public Integer dt;
+    public Long dt;
 
     @SerializedName("sys")
     public Sys sys;
@@ -81,6 +81,10 @@ public class CityWeatherMap {
 
     public Wind getWind() {
         return wind;
+    }
+
+    public Long getDateInUnix() {
+        return dt;
     }
 
     public class Clouds {
