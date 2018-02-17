@@ -7,7 +7,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.google.gson.Gson;
-import com.martin.weatheronline.weatherapponline.network.CityWeatherMap;
+import com.martin.weatheronline.weatherapponline.network.ForecastWeatherMap;
+import com.martin.weatheronline.weatherapponline.network.TodayWeatherMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +29,6 @@ public class WeatherDB {
         this.gson = gson;
     }
 
-    //FIXME Когда стоит открывать и закрвать доступ к БД, каждый раз когда делаешь запрос как у меня...
-    //или как было в примере с урока в OnCreate  - открыли, в onDestriy - закрыли
-    //в методе getWritableDatabase написано (Make sure to call close() when you no longer need the database.)
     public void open() {
         db = dbHelper.getWritableDatabase();
     }
@@ -39,24 +37,21 @@ public class WeatherDB {
         dbHelper.close();
     }
 
-    public void addOrUpdateCityWeather(int id, String cityName, String weatherJson) {
-        open();
+    public void addOrUpdateCityWeather(int id, String cityName, String weatherJson, String forecastJson) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.ID, id);
         values.put(DatabaseHelper.CITY_NAME, cityName.toLowerCase());
         values.put(DatabaseHelper.WEATHER_JSON, weatherJson);
+        values.put(DatabaseHelper.FORECAST_JSON, forecastJson);
 
         if (checkIdInDb(id)) {
             db.update(DatabaseHelper.TABLE_WEATHER, values, DatabaseHelper.ID + "=" + id, null);
         } else db.insert(DatabaseHelper.TABLE_WEATHER, null, values);
-
-        close();
     }
 
 
-    public CityWeatherMap getCityWeatherFromDb(String cityName) {
-        open();
-        CityWeatherMap weatherMapFromDb = null;
+    public TodayWeatherMap getCityWeatherFromDb(String cityName) {
+        TodayWeatherMap weatherMapFromDb = null;
         cityName = cityName.toLowerCase();
         String query = "SELECT " + DatabaseHelper.WEATHER_JSON + " FROM " + DatabaseHelper.TABLE_WEATHER + " WHERE " + DatabaseHelper.CITY_NAME + " = \'" + cityName + "\'";
 
@@ -64,23 +59,34 @@ public class WeatherDB {
 
         if (cursor.moveToFirst()) {
             String jsonString = cursor.getString(0);
-            weatherMapFromDb = gson.fromJson(jsonString, CityWeatherMap.class);
+            weatherMapFromDb = gson.fromJson(jsonString, TodayWeatherMap.class);
+        }
+        cursor.close();
+        return weatherMapFromDb;
+    }
+
+    public ForecastWeatherMap getForecastWeatherFromDb(String cityName) {
+        open();
+        ForecastWeatherMap forecastWeatherMapFromDB = null;
+        cityName = cityName.toLowerCase();
+        String query = "SELECT " + DatabaseHelper.FORECAST_JSON + " FROM " + DatabaseHelper.TABLE_WEATHER + " WHERE " + DatabaseHelper.CITY_NAME + " = \'" + cityName + "\'";
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            String jsonString = cursor.getString(0);
+            forecastWeatherMapFromDB = gson.fromJson(jsonString, ForecastWeatherMap.class);
         }
         cursor.close();
 
         close();
-        return weatherMapFromDb;
+        return forecastWeatherMapFromDB;
     }
 
     public boolean checkIdInDb(int id) {
         List<Integer> cityIdiesInDB = new ArrayList<>();
         String query = "SELECT " + DatabaseHelper.ID + " FROM " + DatabaseHelper.TABLE_WEATHER;
         Cursor cursor = db.rawQuery(query, null);
-
-        //FIXME почему не удается сделать запрос?
-        //Когда в SQLiteStudio запрос - SELECT id FROM city_weather - работает нормально
-        //Cursor cursor = db.rawQuery("SELECT ? FROM ?", new String[]{DatabaseHelper.ID, DatabaseHelper.TABLE_WEATHER});
-
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             cityIdiesInDB.add(cursor.getInt(0));

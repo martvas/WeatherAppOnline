@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 
-public class CityWeatherMap {
+public class TodayWeatherMap {
 
     @SerializedName("coord")
     public Coord coord;

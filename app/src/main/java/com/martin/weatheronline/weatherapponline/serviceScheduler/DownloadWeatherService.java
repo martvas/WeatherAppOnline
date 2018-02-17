@@ -9,7 +9,8 @@ import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.gson.Gson;
 import com.martin.weatheronline.weatherapponline.database.WeatherDB;
-import com.martin.weatheronline.weatherapponline.network.CityWeatherMap;
+import com.martin.weatheronline.weatherapponline.network.ForecastWeatherMap;
+import com.martin.weatheronline.weatherapponline.network.TodayWeatherMap;
 import com.martin.weatheronline.weatherapponline.network.WeatherLoader;
 import com.martin.weatheronline.weatherapponline.sharedPreferences.CitySharedPreferences;
 
@@ -40,11 +41,10 @@ public class DownloadWeatherService extends JobService {
         WeatherDB weatherDB = new WeatherDB(context, gson);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String city = sharedPreferences.getString(CitySharedPreferences.KEY, CitySharedPreferences.STANDART_CITY);
-        CityWeatherMap cityWeatherMap = WeatherLoader.getWeatherMap(context, city);
-        if (cityWeatherMap == null || cityWeatherMap.getCod() == 404) {
-            return;
-        } else {
-            weatherDB.addOrUpdateCityWeather(cityWeatherMap.getId(), cityWeatherMap.getName(), gson.toJson(cityWeatherMap));
+        TodayWeatherMap todayWeatherMap = WeatherLoader.getTodayWeatherMap(context, city);
+        ForecastWeatherMap forecastWeatherMap = WeatherLoader.getForecastWeatherMap(context, city);
+        if (todayWeatherMap != null || todayWeatherMap.getCod() != 404) {
+            weatherDB.addOrUpdateCityWeather(todayWeatherMap.getId(), todayWeatherMap.getName(), gson.toJson(todayWeatherMap), gson.toJson(forecastWeatherMap));
         }
 //        jobFinished(jobParameters, true);
     }

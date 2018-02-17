@@ -20,11 +20,11 @@ public class WeatherLoader {
     private static final String OPEN_WEATHER_BASE_URL = "http://api.openweathermap.org/";
     private static final String UNIT = "metric";
 
-    public static CityWeatherMap getWeatherMap(Context context, String city) {
-        CityWeatherMap weatherMap = null;
+    public static TodayWeatherMap getTodayWeatherMap(Context context, String city) {
+        TodayWeatherMap todayWeatherMap = null;
 
         //когда оффлайн очень долго делал запрос через Retrofit, поэтому сделал быструю проверку на доступ к интернету
-        if (!isConnectedToInternet(context)) return weatherMap;
+        if (!isConnectedToInternet(context)) return todayWeatherMap;
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(OPEN_WEATHER_BASE_URL)
@@ -33,31 +33,60 @@ public class WeatherLoader {
 
         WeatherApi weatherApi = retrofit.create(WeatherApi.class);
 
-        Call<CityWeatherMap> call = weatherApi.getWeatherByCityname(city, UNIT, apiKey);
+        Call<TodayWeatherMap> call = weatherApi.getTodayWeatherByCityname(city, UNIT, apiKey);
 
         try {
-            Response<CityWeatherMap> response = call.execute();
+            Response<TodayWeatherMap> response = call.execute();
 
             if (response.isSuccessful()) {
-                weatherMap = response.body();
+                todayWeatherMap = response.body();
             } else if (response.code() == 404) {
-                weatherMap = new CityWeatherMap();
-                weatherMap.setCod(404);
+                todayWeatherMap = new TodayWeatherMap();
+                todayWeatherMap.setCod(404);
             }
         } catch (IOException e) {
             Log.d(WeatherActivity.LOG_TAG, e.getMessage());
         }
-        return weatherMap;
+        return todayWeatherMap;
     }
+
+    public static ForecastWeatherMap getForecastWeatherMap(Context context, String city) {
+        ForecastWeatherMap forecastWeatherMap = null;
+        //когда оффлайн очень долго делал запрос через Retrofit, поэтому сделал быструю проверку на доступ к интернету
+        if (!isConnectedToInternet(context)) return forecastWeatherMap;
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(OPEN_WEATHER_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        WeatherApi weatherApi = retrofit.create(WeatherApi.class);
+        Call<ForecastWeatherMap> call = weatherApi.getForecastWeatherByCityname(city, UNIT, apiKey);
+
+        try {
+            Response<ForecastWeatherMap> response = call.execute();
+
+            if (response.isSuccessful()) {
+                forecastWeatherMap = response.body();
+            } else if (response.code() == 404) {
+                forecastWeatherMap = new ForecastWeatherMap();
+                forecastWeatherMap.setCod(404);
+            }
+        } catch (IOException e) {
+            Log.d(WeatherActivity.LOG_TAG, e.getMessage());
+        }
+
+        return forecastWeatherMap;
+    }
+
 
     private static boolean isConnectedToInternet(Context context) {
         ConnectivityManager connectivityManager;
         NetworkInfo activeNetwork;
 
         connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        activeNetwork = connectivityManager.getActiveNetworkInfo();
+        activeNetwork = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
+
         if (activeNetwork == null) return false;
-        else if (activeNetwork.isConnected()) return true;
         else return true;
     }
 

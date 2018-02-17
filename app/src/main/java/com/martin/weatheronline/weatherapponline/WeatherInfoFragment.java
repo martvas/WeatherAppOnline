@@ -13,12 +13,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.martin.weatheronline.weatherapponline.database.WeatherDB;
-import com.martin.weatheronline.weatherapponline.network.CityWeatherMap;
+import com.martin.weatheronline.weatherapponline.network.ForecastWeatherMap;
+import com.martin.weatheronline.weatherapponline.network.TodayWeatherMap;
 import com.martin.weatheronline.weatherapponline.network.WeatherLoader;
 import com.martin.weatheronline.weatherapponline.serviceScheduler.WeatherJobScheduler;
 import com.martin.weatheronline.weatherapponline.sharedPreferences.CitySharedPreferences;
@@ -34,6 +37,9 @@ public class WeatherInfoFragment extends Fragment {
     private CitySharedPreferences sharedPreferences;
     private Gson gson;
 
+    private ProgressBar progressBar;
+    private RelativeLayout mainLayout;
+
     private Typeface weatherFont;
     private TextView cityTitle;
     private TextView date;
@@ -41,6 +47,8 @@ public class WeatherInfoFragment extends Fragment {
     private TextView tempNow;
     private TextView minTempValue;
     private TextView maxTempValue;
+
+
     private TextView pressureValue;
     private TextView humidityValue;
     private TextView windValue;
@@ -53,8 +61,9 @@ public class WeatherInfoFragment extends Fragment {
         weatherFont = Typeface.createFromAsset(weatherActivity.getAssets(), FONT_FILENAME);
         gson = new Gson();
         weatherDB = new WeatherDB(weatherActivity, gson);
-        sharedPreferences = new CitySharedPreferences(getActivity());
-        updateWeatherData(true, sharedPreferences.getCityFromSP());
+        weatherDB.open();
+        sharedPreferences = new CitySharedPreferences(weatherActivity);
+
         WeatherJobScheduler weatherJobScheduler = new WeatherJobScheduler(getContext());
         weatherJobScheduler.startSchedule();
     }
@@ -62,6 +71,9 @@ public class WeatherInfoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View weatherInfoView = inflater.inflate(R.layout.fragment_weather_info, container, false);
+        progressBar = weatherInfoView.findViewById(R.id.progressbar);
+        mainLayout = weatherInfoView.findViewById(R.id.main_layout);
+
         cityTitle = weatherInfoView.findViewById(R.id.city_title);
         date = weatherInfoView.findViewById(R.id.datetime);
         cityWeatherIcon = weatherInfoView.findViewById(R.id.city_weather_icon);
@@ -81,28 +93,39 @@ public class WeatherInfoFragment extends Fragment {
             }
         });
 
+        updateWeatherData(sharedPreferences.getCityFromSP());
+
         return weatherInfoView;
+
+
     }
 
 
-    private void updateWeatherData(final boolean firstLaunching, final String city) {
+    private void updateWeatherData(final String city) {
+
+        showProgressBar();
+
+
         new Thread() {
             public void run() {
-                final CityWeatherMap weatherMap = WeatherLoader.getWeatherMap(getActivity(), city);
+                final TodayWeatherMap weatherMap = WeatherLoader.getTodayWeatherMap(getActivity(), city);
+                final ForecastWeatherMap forecastWeatherMap = WeatherLoader.getForecastWeatherMap(getContext(), city);
                 //NULL - возвращает, когда проблемы с доступом к сайту или exception
-                // не писал дополнительный метод для проверки доступа к интернету, так как решил что можно в ответе getWeatherMap получить нужную инфу
+                // не писал дополнительный метод для проверки доступа к интернету, так как решил что можно в ответе getTodayWeatherMap получить нужную инфу
                 if (weatherMap == null) {
                     //Получаем данные из базы данных если есть
-                    final CityWeatherMap weatherMapFromDB = weatherDB.getCityWeatherFromDb(city);
+                    final TodayWeatherMap weatherMapFromDB = weatherDB.getCityWeatherFromDb(city);
                     if (weatherMapFromDB == null) {
                         handler.post(new Runnable() {
                             public void run() {
+                                hideProgressBar();
                                 showToast(getString(R.string.inet_problem));
                             }
                         });
                     } else {
                         handler.post(new Runnable() {
                             public void run() {
+                                hideProgressBar();
                                 showToast(getString(R.string.inet_problem_local_weather));
                                 renderWeather(weatherMapFromDB);
                             }
@@ -114,13 +137,15 @@ public class WeatherInfoFragment extends Fragment {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
+                            hideProgressBar();
                             showToast(getString(R.string.city_not_found));
                         }
                     });
                 } else {
-                    weatherDB.addOrUpdateCityWeather(weatherMap.getId(), weatherMap.getName(), gson.toJson(weatherMap));
+                    weatherDB.addOrUpdateCityWeather(weatherMap.getId(), weatherMap.getName(), gson.toJson(weatherMap), gson.toJson(forecastWeatherMap));
                     handler.post(new Runnable() {
                         public void run() {
+                            hideProgressBar();
                             sharedPreferences.setCityInSP(city);
                             renderWeather(weatherMap);
                         }
@@ -130,7 +155,17 @@ public class WeatherInfoFragment extends Fragment {
         }.start();
     }
 
-    private void renderWeather(CityWeatherMap map) {
+    private void showProgressBar() {
+        mainLayout.setVisibility(View.GONE);
+        progressBar.setVisibility(ProgressBar.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        mainLayout.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(ProgressBar.INVISIBLE);
+    }
+
+    private void renderWeather(TodayWeatherMap map) {
         try {
             String city = map.getName().toUpperCase(Locale.US);
             Long unixDate = map.getDateInUnix();
@@ -180,7 +215,7 @@ public class WeatherInfoFragment extends Fragment {
     }
 
     public void changeCity(String city) {
-        updateWeatherData(false, city);
+        updateWeatherData(city);
     }
 
     private void showToast(String textForToast) {
@@ -197,5 +232,11 @@ public class WeatherInfoFragment extends Fragment {
         } catch (ActivityNotFoundException e) {
             showToast("No email client on device");
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        weatherDB.close();
     }
 }

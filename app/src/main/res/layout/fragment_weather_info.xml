@@ -3,14 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <FrameLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_gravity="start">
 
         <RelativeLayout
+            android:id="@+id/main_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
+            android:layout_height="match_parent"
+            android:gravity="start">
 
             <TextView
                 android:id="@+id/city_title"
@@ -199,8 +201,6 @@
                 android:layout_marginLeft="@dimen/small_value_to_title_margin"
                 android:layout_toRightOf="@id/wind_value"
                 android:text="@string/percent_sign" />
-
-
         </RelativeLayout>
 
         <android.support.design.widget.FloatingActionButton
@@ -210,6 +210,13 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             android:src="@drawable/ic_share" />
+
+        <ProgressBar
+            android:id="@+id/progressbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="invisible" />
 
     </FrameLayout>
 </ScrollView>
