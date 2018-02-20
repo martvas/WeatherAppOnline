@@ -6,46 +6,52 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    public static final String TABLE_WEATHER = "city_weather";
+    static final String TABLE_WEATHER = "city_weather";
     //столбцы в табличке
-    public static final String ID = "id";
-    public static final String CITY_NAME = "city_name";
-    public static final String WEATHER_JSON = "weather_json";
-    public static final String FORECAST_JSON = "forecast_json";
+    static final String ID = "id";
+    static final String CITY_NAME = "city_name";
+    static final String WEATHER_JSON = "weather_json";
+    static final String FORECAST_JSON = "forecast_json";
 
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 4;
     private static final String DB_NAME = "weatherapp.db";
 
-    private static final String ALTER_FORECAST_JSON_V2 = "ALTER TABLE " + TABLE_WEATHER + " ADD COLUMN " + FORECAST_JSON + " TEXT";
+    private static final String DROP_TABLE = "DROP TABLE " + TABLE_WEATHER;
+    private static final String DATABASE_V3 = new StringBuilder()
+            .append("CREATE TABLE ")
+            .append(TABLE_WEATHER)
+            .append(" (\n")
+            .append(" ")
+            .append(ID)
+            .append(" INTEGER PRIMARY KEY\n")
+            .append("UNIQUE\n")
+            .append("NOT NULL,\n")
+            .append(" ")
+            .append(CITY_NAME)
+            .append(" TEXT (150)  NOT NULL,\n")
+            .append(" ")
+            .append(WEATHER_JSON)
+            .append(" TEXT (5000),\n")
+            .append(" ")
+            .append(FORECAST_JSON)
+            .append(" TEXT (5000)\n")
+            .append(");\n")
+            .toString();
 
-    public DatabaseHelper(Context context) {
+    DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL(new StringBuilder()
-                .append("CREATE TABLE ")
-                .append(TABLE_WEATHER)
-                .append(" (\n")
-                .append(" ")
-                .append(ID)
-                .append(" INTEGER PRIMARY KEY\n")
-                .append("UNIQUE\n")
-                .append("NOT NULL,\n")
-                .append(" ")
-                .append(CITY_NAME)
-                .append(" TEXT (150)  NOT NULL,\n")
-                .append(" ")
-                .append(WEATHER_JSON)
-                .append(" TEXT (5000) NOT NULL\n")
-                .append(");\n")
-                .toString());
-        ;
+        sqLiteDatabase.execSQL(DATABASE_V3);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        if (oldVersion < 2) sqLiteDatabase.execSQL(ALTER_FORECAST_JSON_V2);
+        if (oldVersion < 4) {
+            sqLiteDatabase.execSQL(DROP_TABLE);
+            sqLiteDatabase.execSQL(DATABASE_V3);
+        }
     }
 }

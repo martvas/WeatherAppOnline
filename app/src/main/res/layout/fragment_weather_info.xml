@@ -5,7 +5,7 @@
 
     <FrameLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="start">
 
         <RelativeLayout
@@ -200,7 +200,7 @@
                 android:layout_below="@id/humidity_title"
                 android:layout_marginLeft="@dimen/small_value_to_title_margin"
                 android:layout_toRightOf="@id/wind_value"
-                android:text="@string/percent_sign" />
+                android:text="@string/km_h" />
         </RelativeLayout>
 
         <android.support.design.widget.FloatingActionButton

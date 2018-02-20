@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.martin.weatheronline.weatherapponline.database.WeatherDB;
-import com.martin.weatheronline.weatherapponline.network.ForecastWeatherMap;
 import com.martin.weatheronline.weatherapponline.network.TodayWeatherMap;
 import com.martin.weatheronline.weatherapponline.network.WeatherLoader;
 import com.martin.weatheronline.weatherapponline.serviceScheduler.WeatherJobScheduler;
@@ -31,8 +30,8 @@ import java.util.Locale;
 
 public class WeatherInfoFragment extends Fragment {
 
+    public static final String FONT_FILENAME = "fonts/weathericons-regular-webfont.ttf";
     private static final String LOG_TAG = "WeatherInfoFrag";
-    private static final String FONT_FILENAME = "fonts/weathericons-regular-webfont.ttf";
     private final Handler handler = new Handler();
     private CitySharedPreferences sharedPreferences;
     private Gson gson;
@@ -54,6 +53,16 @@ public class WeatherInfoFragment extends Fragment {
     private TextView windValue;
     private WeatherDB weatherDB;
 
+    public static int getResId(String resName, Class<?> c) {
+        try {
+            Field idField = c.getDeclaredField(resName);
+            return idField.getInt(idField);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +72,6 @@ public class WeatherInfoFragment extends Fragment {
         weatherDB = new WeatherDB(weatherActivity, gson);
         weatherDB.open();
         sharedPreferences = new CitySharedPreferences(weatherActivity);
-
         WeatherJobScheduler weatherJobScheduler = new WeatherJobScheduler(getContext());
         weatherJobScheduler.startSchedule();
     }
@@ -73,7 +81,6 @@ public class WeatherInfoFragment extends Fragment {
         View weatherInfoView = inflater.inflate(R.layout.fragment_weather_info, container, false);
         progressBar = weatherInfoView.findViewById(R.id.progressbar);
         mainLayout = weatherInfoView.findViewById(R.id.main_layout);
-
         cityTitle = weatherInfoView.findViewById(R.id.city_title);
         date = weatherInfoView.findViewById(R.id.datetime);
         cityWeatherIcon = weatherInfoView.findViewById(R.id.city_weather_icon);
@@ -84,7 +91,6 @@ public class WeatherInfoFragment extends Fragment {
         pressureValue = weatherInfoView.findViewById(R.id.pressure_value);
         humidityValue = weatherInfoView.findViewById(R.id.humidity_value);
         windValue = weatherInfoView.findViewById(R.id.wind_value);
-
         FloatingActionButton fab = weatherInfoView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,24 +98,15 @@ public class WeatherInfoFragment extends Fragment {
                 startShareIntent();
             }
         });
-
-        updateWeatherData(sharedPreferences.getCityFromSP());
-
+        updateTodayWeatherData(sharedPreferences.getCityFromSP());
         return weatherInfoView;
-
-
     }
 
-
-    private void updateWeatherData(final String city) {
-
+    private void updateTodayWeatherData(final String city) {
         showProgressBar();
-
-
         new Thread() {
             public void run() {
                 final TodayWeatherMap weatherMap = WeatherLoader.getTodayWeatherMap(getActivity(), city);
-                final ForecastWeatherMap forecastWeatherMap = WeatherLoader.getForecastWeatherMap(getContext(), city);
                 //NULL - возвращает, когда проблемы с доступом к сайту или exception
                 // не писал дополнительный метод для проверки доступа к интернету, так как решил что можно в ответе getTodayWeatherMap получить нужную инфу
                 if (weatherMap == null) {
@@ -142,7 +139,7 @@ public class WeatherInfoFragment extends Fragment {
                         }
                     });
                 } else {
-                    weatherDB.addOrUpdateCityWeather(weatherMap.getId(), weatherMap.getName(), gson.toJson(weatherMap), gson.toJson(forecastWeatherMap));
+                    weatherDB.addOrUpdateTodayWeather(weatherMap.getId(), weatherMap.getName(), gson.toJson(weatherMap));
                     handler.post(new Runnable() {
                         public void run() {
                             hideProgressBar();
@@ -176,46 +173,30 @@ public class WeatherInfoFragment extends Fragment {
             Integer humidity = map.getMainInfo().getHumidity();
             Float wind = map.getWind().getSpeed();
             getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-
             Integer id = map.getWeatherId();
-            Long sunrise = map.getSunrise();
-            Long sunset = map.getSunset();
-
             cityTitle.setText(city);
-            date.setText(String.format("Lastupdate: %1$tk:%1$tM %1$te.%1$tm.%1$tY", unixDate * 1000));
+            date.setText(String.format(Locale.ENGLISH, "Lastupdate: %1$tk:%1$tM %1$te.%1$tm.%1$ty", unixDate * 1000));
             tempNow.setText(String.format(Locale.ENGLISH, "%.1f", temp));
             minTempValue.setText(String.format(Locale.ENGLISH, "%.1f", minTemp));
             maxTempValue.setText(String.format(Locale.ENGLISH, "%.1f", maxTemp));
             pressureValue.setText(String.format(Locale.ENGLISH, "%.2f", pressure));
             humidityValue.setText(String.format(Locale.ENGLISH, "%d", humidity));
             windValue.setText(String.format(Locale.ENGLISH, "%.2f", wind));
-            setWeatherIcon(id, sunrise, sunset);
+            setWeatherIcon(id);
         } catch (Exception e) {
             Log.d(LOG_TAG, e.getMessage());
         }
     }
 
-
-    private void setWeatherIcon(int actualId, long sunrise, long sunset) {
+    private void setWeatherIcon(int actualId) {
         String iconId = "wi_owm_" + actualId;
         int id = getResId(iconId, R.string.class);
         String icon = getString(id);
         cityWeatherIcon.setText(icon);
     }
 
-
-    public int getResId(String resName, Class<?> c) {
-        try {
-            Field idField = c.getDeclaredField(resName);
-            return idField.getInt(idField);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
     public void changeCity(String city) {
-        updateWeatherData(city);
+        updateTodayWeatherData(city);
     }
 
     private void showToast(String textForToast) {

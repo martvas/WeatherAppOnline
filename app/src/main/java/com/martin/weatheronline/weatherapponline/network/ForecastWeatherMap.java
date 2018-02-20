@@ -19,7 +19,7 @@ public class ForecastWeatherMap {
     private Integer cnt;
     @SerializedName("list")
     @Expose
-    private List<ForecastList> list = null;
+    private List<Forecast> list = null;
     @SerializedName("city")
     @Expose
     private City city;
@@ -28,7 +28,7 @@ public class ForecastWeatherMap {
         return cod;
     }
 
-    public void setCod(Integer cod) {
+    void setCod(Integer cod) {
         this.cod = cod;
     }
 
@@ -48,11 +48,11 @@ public class ForecastWeatherMap {
         this.cnt = cnt;
     }
 
-    public List<ForecastList> getList() {
+    public List<Forecast> getForecastList() {
         return list;
     }
 
-    public void setList(List<ForecastList> list) {
+    public void setList(List<Forecast> list) {
         this.list = list;
     }
 
@@ -168,12 +168,12 @@ public class ForecastWeatherMap {
 
     }
 
-    public class ForecastList {
+    public class Forecast {
 
         @SerializedName("dt")
         @Expose
-        private Integer dt;
-        @SerializedName("mainInformation")
+        private Long dt;
+        @SerializedName("main")
         @Expose
         private MainInformation mainInformation;
         @SerializedName("weather")
@@ -195,11 +195,11 @@ public class ForecastWeatherMap {
         @Expose
         private String dtTxt;
 
-        public Integer getDt() {
+        public Long getDt() {
             return dt;
         }
 
-        public void setDt(Integer dt) {
+        public void setDt(Long dt) {
             this.dt = dt;
         }
 
@@ -286,7 +286,7 @@ public class ForecastWeatherMap {
         private Integer humidity;
         @SerializedName("temp_kf")
         @Expose
-        private Integer tempKf;
+        private Float tempKf;
 
         public Float getTemp() {
             return temp;
@@ -344,11 +344,11 @@ public class ForecastWeatherMap {
             this.humidity = humidity;
         }
 
-        public Integer getTempKf() {
+        public Float getTempKf() {
             return tempKf;
         }
 
-        public void setTempKf(Integer tempKf) {
+        public void setTempKf(Float tempKf) {
             this.tempKf = tempKf;
         }
 

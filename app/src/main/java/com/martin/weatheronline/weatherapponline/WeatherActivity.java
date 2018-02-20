@@ -3,6 +3,9 @@ package com.martin.weatheronline.weatherapponline;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -10,12 +13,12 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 public class WeatherActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = "wlog";
-    public static final String WEATHER_FRAGMENT_TAG = "weather_info_tag123";
     private static final String DIALOG_BTN_TEXT = "Search";
     MyPagerAdapter myPagerAdapter;
 
@@ -23,17 +26,13 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-
         final ViewPager viewPager = findViewById(R.id.view_pager);
         myPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(myPagerAdapter);
-
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -87,5 +86,53 @@ public class WeatherActivity extends AppCompatActivity {
     public void searchNewCity(String city) {
         WeatherInfoFragment weatherInfoFragment = (WeatherInfoFragment) getSupportFragmentManager().findFragmentByTag(myPagerAdapter.getWeatherFragment().getTag());
         weatherInfoFragment.changeCity(city);
+        ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager().findFragmentByTag(myPagerAdapter.getForecastFragment().getTag());
+        forecastFragment.updateForecastFromApi(city);
+    }
+
+
+    public class MyPagerAdapter extends FragmentPagerAdapter {
+        private Fragment weatherFragment;
+        private Fragment forecastFragment;
+
+        MyPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0) {
+                return new WeatherInfoFragment();
+            } else {
+                return new ForecastFragment();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment createdFragment = (Fragment) super.instantiateItem(container, position);
+            switch (position) {
+                case 0:
+                    weatherFragment = createdFragment;
+                    break;
+                case 1:
+                    forecastFragment = createdFragment;
+                    break;
+            }
+            return createdFragment;
+        }
+
+        Fragment getWeatherFragment() {
+            return weatherFragment;
+        }
+
+        Fragment getForecastFragment() {
+            return forecastFragment;
+        }
     }
 }

@@ -64,7 +64,6 @@ public class WeatherLoader {
 
         try {
             Response<ForecastWeatherMap> response = call.execute();
-
             if (response.isSuccessful()) {
                 forecastWeatherMap = response.body();
             } else if (response.code() == 404) {

@@ -37,11 +37,21 @@ public class WeatherDB {
         dbHelper.close();
     }
 
-    public void addOrUpdateCityWeather(int id, String cityName, String weatherJson, String forecastJson) {
+    public void addOrUpdateTodayWeather(int id, String cityName, String weatherJson) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.ID, id);
         values.put(DatabaseHelper.CITY_NAME, cityName.toLowerCase());
         values.put(DatabaseHelper.WEATHER_JSON, weatherJson);
+
+        if (checkIdInDb(id)) {
+            db.update(DatabaseHelper.TABLE_WEATHER, values, DatabaseHelper.ID + "=" + id, null);
+        } else db.insert(DatabaseHelper.TABLE_WEATHER, null, values);
+    }
+
+    public void addOrUpdateForecast(int id, String cityName, String forecastJson) {
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.ID, id);
+        values.put(DatabaseHelper.CITY_NAME, cityName.toLowerCase());
         values.put(DatabaseHelper.FORECAST_JSON, forecastJson);
 
         if (checkIdInDb(id)) {
@@ -66,7 +76,6 @@ public class WeatherDB {
     }
 
     public ForecastWeatherMap getForecastWeatherFromDb(String cityName) {
-        open();
         ForecastWeatherMap forecastWeatherMapFromDB = null;
         cityName = cityName.toLowerCase();
         String query = "SELECT " + DatabaseHelper.FORECAST_JSON + " FROM " + DatabaseHelper.TABLE_WEATHER + " WHERE " + DatabaseHelper.CITY_NAME + " = \'" + cityName + "\'";
@@ -79,11 +88,10 @@ public class WeatherDB {
         }
         cursor.close();
 
-        close();
         return forecastWeatherMapFromDB;
     }
 
-    public boolean checkIdInDb(int id) {
+    private boolean checkIdInDb(int id) {
         List<Integer> cityIdiesInDB = new ArrayList<>();
         String query = "SELECT " + DatabaseHelper.ID + " FROM " + DatabaseHelper.TABLE_WEATHER;
         Cursor cursor = db.rawQuery(query, null);

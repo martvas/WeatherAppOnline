@@ -76,8 +76,11 @@
     <string name="inet_problem_local_weather">Internet connection problem. Loading local weather map</string>
     <string name="inet_problem">Internet connection problem</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="km_h"> km/h</string>
+    <string name="weather_today_tab">Weather today</string>
+    <string name="_3_day_forecast_tab">3 day forecast</string>
+    <string name="degree_symbol">°</string>
+    <string name="wind_title_forecast">Wind:</string>
 
 
 </resources>

@@ -4,10 +4,11 @@
     android:layout_height="match_parent"
     tools:context="com.martin.weatheronline.weatherapponline.ForecastFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/forecast_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_marginBottom="8dp"></android.support.v7.widget.RecyclerView>
 
 </FrameLayout>

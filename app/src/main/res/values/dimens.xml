@@ -7,4 +7,10 @@
     <dimen name="celsius_grade_paddingTop">32dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="city_margin_top">20dp</dimen>
+    <dimen name="forecast_day_week_txt_size">18sp</dimen>
+    <dimen name="forecast_date_txt_size">12sp</dimen>
+    <dimen name="forecast_time_txt_size">24sp</dimen>
+    <dimen name="forecast_icon_size">32sp</dimen>
+    <dimen name="forecast_temp_txt_size">32sp</dimen>
+    <dimen name="forecast_description_txt_size">12sp</dimen>
 </resources>
